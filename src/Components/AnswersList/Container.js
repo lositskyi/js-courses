@@ -1,4 +1,4 @@
-import { compose, withStateHandlers, withHandlers, lifecycle, branch, renderComponent } from 'recompose';
+import { compose, withStateHandlers, withHandlers, lifecycle, branch, renderComponent, withProps } from 'recompose';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router';
 import { db } from '../../utils';
@@ -8,7 +8,7 @@ import Component from './Component';
 
 const mapStateToProps = state => ({
   user: state.user,
-  // TODO: CODE FOR YOUR HOMEWORK HERE
+  sortBy: state.answerSort,
 });
 
 const enhance = compose(
@@ -30,7 +30,6 @@ const enhance = compose(
         votes = votes.filter(vote => answerIds.includes(vote.answerId));
 
         const users = await db.users.find();
-
         this.setState({ answers, votes, users, isFetching: false });
       });
     },
@@ -56,6 +55,7 @@ const enhance = compose(
       }
     }
   }),
+
 );
 
 

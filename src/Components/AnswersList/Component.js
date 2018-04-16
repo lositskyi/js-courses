@@ -91,7 +91,7 @@ const AnswerBottomWrapper = styled.div`
 const AnswerBottom = styled.span``;
 
 
-const votesByAnswerId = (votes, answerId) => votes.filter(vote => vote.answerId === answerId)
+const votesByAnswerId = (votes, answerId) => votes.filter(vote => vote.answerId === answerId);
 
 const divideVotes = votes => {
   const positive = votes.filter(vote => vote.isPositive).length;
@@ -102,13 +102,52 @@ const divideVotes = votes => {
 
 const divideByAnswerId = (votes, answerId) => divideVotes(votesByAnswerId(votes, answerId));
 
+const sortAnswers = (answers, votes, sortBy) => {
+  switch (sortBy) {
+    case 'createdAt':
+      return answers.sort((answerA, answerB) => {
+        return answerA.createdAt < answerB.createdAt;
+      });
+      break;
+    case 'best':
+      return answers.sort((answerA, answerB) => {
+        const positiveA = divideByAnswerId(votes, answerA._id).positive;
+        const positiveB = divideByAnswerId(votes, answerB._id).positive;
+        const negativeA = divideByAnswerId(votes, answerA._id).negative;
+        const negativeB = divideByAnswerId(votes, answerB._id).negative;
+
+        if (positiveA != positiveB) {
+          return positiveA < positiveB;
+        } else {
+          return negativeA > negativeB;
+        }
+      });
+      break;
+    case 'worst':
+      return answers.sort((answerA, answerB) => {
+        const positiveA = divideByAnswerId(votes, answerA._id).positive;
+        const positiveB = divideByAnswerId(votes, answerB._id).positive;
+        const negativeA = divideByAnswerId(votes, answerA._id).negative;
+        const negativeB = divideByAnswerId(votes, answerB._id).negative;
+
+        if (negativeA != negativeB) {
+          return negativeA < negativeB;
+        } else {
+          return positiveA > positiveB;
+        }
+      });
+      break;
+    default:
+      return answers
+  }
+};
 
 const getAuthor = (users, authorId) => users.find(user => user._id === authorId)
   || { profile: { fullName: 'Anonymous' } };
 
-const AnswersList = ({ answers, votes, users, onVote, user }) => (
+const AnswersList = ({ answers, votes, users, onVote, user, sortBy }) => (
   <Answers>
-    {answers.map(answer => {
+    {sortAnswers(answers, votes, sortBy).map(answer => {
       const { positive, negative } = divideByAnswerId(votes, answer._id);
       const author = getAuthor(users, answer.createdById);
       return (
